@@ -1,0 +1,19 @@
+{
+  "name": "gep",
+  "version": "0.0.1",
+  "description": "General Expression Parser",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/longhaohe/gep.git"
+  },
+  "author": "longhao he <longhaohe@gmail.com> (http://longhaohe.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/longhaohe/gep/issues"
+  },
+  "homepage": "https://github.com/longhaohe/gep#readme"
+}
