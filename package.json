@@ -8,7 +8,7 @@
     "cover": "$(npm bin)/istanbul cover _mocha -- -R spec",
     "lint": "$(npm bin)/eslint src/**",
     "dev": "node dev/watch",
-    "build": "rm -rf dist/* && npm run rollup && MIN=min npm run rollup",
+    "build": "rm -rf dist && npm run rollup && MIN=min npm run rollup",
     "rollup": "$(npm bin)/rollup --config --environment NODE_ENV:production --sourcemap"
   },
   "repository": {
