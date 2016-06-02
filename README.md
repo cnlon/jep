@@ -6,11 +6,33 @@ General Expression Parser
 [![npm version](https://badge.fury.io/js/gep.svg)](https://badge.fury.io/js/gep)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com)
 
-## Usage
+## Installation
 
 ``` bash
 npm install --save gep
 ```
+## Usage
+
+``` javascript
+import gep from 'gep'
+
+let scope = {
+  a: 1,
+}
+
+const expr = 'a===1 ? true : false'
+const func = gep(expr)
+console.log(func.toString())
+// function anonymous($,_
+// /**/) {
+// return $.a===1?true:false;
+// }
+const res = func(scope)
+console.log(res)
+// true
+```
+
+or
 
 ``` javascript
 import gep from 'gep'
