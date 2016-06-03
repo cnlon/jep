@@ -1,14 +1,20 @@
-var gep = require('./dev.js')
+const gep = require('./dev.js')
 
-var scope = {
-  a: 1,
+const scope = {
+  radius: 3,
+  unit: 'm²',
 }
-var global = {
-  b: 3,
+const global = {
+  square: function (n) {
+    return n * n
+  },
+  fixed: function (numObj, num) {
+    return numObj.toFixed(num)
+  },
 }
 
-var expr = 'a + _.b + Math.PI'
-var func = gep(expr)
+const expr = '_.fixed(Math.PI + _.square(radius), 2) + unit'
+const func = gep(expr)
 console.log(func.toString())
-var res = func(scope, global)
+const res = func(scope, global)
 console.log(res)

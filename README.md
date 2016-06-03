@@ -32,28 +32,58 @@ console.log(res)
 // true
 ```
 
-or
+with global
 
 ``` javascript
 import gep from 'gep'
 
 let scope = {
-  a: 1,
+  radius: 3,
 }
 let global = {
-  b: 3,
+  constant: 2,
 }
 
-const expr = 'a + _.b + Math.PI'
+const expr = '_.constant * Math.PI * radius'
 const func = gep(expr)
 console.log(func.toString())
 // function anonymous($,_
 // /**/) {
-// return $.a+_.b+Math.PI;
+// return _.constant*Math.PI*$.radius;
 // }
 const res = func(scope, global)
 console.log(res)
-// 7.141592653589793
+// 18.84955592153876
+```
+
+with function
+
+``` javascript
+import gep from 'gep'
+
+let scope = {
+  radius: 3,
+  unit: 'm²',
+}
+let global = {
+  square (n) {
+    return n * n
+  },
+  fixed (numObj, num) {
+    return numObj.toFixed(num)
+  },
+}
+
+const expr = '_.fixed(Math.PI + _.square(radius), 2) + unit'
+const func = gep(expr)
+console.log(func.toString())
+// function anonymous($,_
+// /**/) {
+// return _.fixed(Math.PI+_.square($.radius),2)+$.unit;
+// }
+const res = func(scope, global)
+console.log(res)
+// 12.14m²
 ```
 
 ## License
