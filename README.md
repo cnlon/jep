@@ -14,28 +14,38 @@ npm install --save gep
 ## Usage
 
 ``` javascript
-import gep from 'gep'
+import Gep from 'gep'
+
+const gep = new Gep()
 
 let scope = {
   a: 1,
 }
 
-const expr = 'a===1 ? true : false'
-const func = gep(expr)
+let expr = 'a===1 ? true : false'
+let parsed = gep.parse(expr)
+console.log(parsed)
+// $.a===1?true:false
+let func = gep.make(parsed)
 console.log(func.toString())
 // function anonymous($,_
 // /**/) {
 // return $.a===1?true:false;
 // }
-const res = func(scope)
+let res = func(scope)
 console.log(res)
 // true
 ```
 
-with global
+with config and global
 
 ``` javascript
-import gep from 'gep'
+import Gep from 'gep'
+
+const gep = new Gep({
+  cache: 100, // Number, default 1000
+  global: 'g', // String, default '_'
+})
 
 let scope = {
   radius: 3,
@@ -44,14 +54,17 @@ let global = {
   constant: 2,
 }
 
-const expr = '_.constant * Math.PI * radius'
-const func = gep(expr)
+let expr = 'g.constant * Math.PI * radius'
+let parsed = gep.parse(expr)
+console.log(parsed)
+// g.constant*Math.PI*$.radius
+let func = gep.make(parsed)
 console.log(func.toString())
-// function anonymous($,_
+// function anonymous($,g
 // /**/) {
-// return _.constant*Math.PI*$.radius;
+// return g.constant*Math.PI*$.radius;
 // }
-const res = func(scope, global)
+let res = func(scope, global)
 console.log(res)
 // 18.84955592153876
 ```
@@ -59,7 +72,9 @@ console.log(res)
 with function
 
 ``` javascript
-import gep from 'gep'
+import Gep from 'gep'
+
+const gep = new Gep()
 
 let scope = {
   radius: 3,
@@ -74,14 +89,14 @@ let global = {
   },
 }
 
-const expr = '_.fixed(Math.PI + _.square(radius), 2) + unit'
-const func = gep(expr)
+let expr = '_.fixed(Math.PI + _.square(radius), 2) + unit'
+let func = gep.parse(expr, true) // and make to function if the second param is true
 console.log(func.toString())
 // function anonymous($,_
 // /**/) {
 // return _.fixed(Math.PI+_.square($.radius),2)+$.unit;
 // }
-const res = func(scope, global)
+let res = func(scope, global)
 console.log(res)
 // 12.14m²
 ```
