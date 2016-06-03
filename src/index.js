@@ -198,14 +198,13 @@ function setGlobal (key) {
 }
 
 /**
- * Parse an expression into re-written getter/setters.
+ * Parse an expression into a function.
  *
  * @param {String} exp
- * @param {Boolean} needSet
  * @return {Function}
  */
 
-export default function parseExpression (exp, needSet) {
+export default function parseExpression (exp) {
   exp = exp.trim()
   // try cache
   var hit = expressionCache.get(exp)
