@@ -9,6 +9,34 @@
   (global.gep = factory());
 }(this, function () { 'use strict';
 
+  var babelHelpers = {};
+
+  babelHelpers.classCallCheck = function (instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  };
+
+  babelHelpers.createClass = function () {
+    function defineProperties(target, props) {
+      for (var i = 0; i < props.length; i++) {
+        var descriptor = props[i];
+        descriptor.enumerable = descriptor.enumerable || false;
+        descriptor.configurable = true;
+        if ("value" in descriptor) descriptor.writable = true;
+        Object.defineProperty(target, descriptor.key, descriptor);
+      }
+    }
+
+    return function (Constructor, protoProps, staticProps) {
+      if (protoProps) defineProperties(Constructor.prototype, protoProps);
+      if (staticProps) defineProperties(Constructor, staticProps);
+      return Constructor;
+    };
+  }();
+
+  babelHelpers;
+
   /**
    * A doubly linked list-based Least Recently Used (LRU)
    * cache. Will keep most recently used items while
@@ -123,17 +151,12 @@
     return returnEntry ? entry : entry.value;
   };
 
-  var expressionCache = new Cache(1000);
+  var $cache = void 0;
 
-  var scopeKeyword = '$';
-  var globalKeyword = '_';
-
-  var allowedKeywords = 'Math,Date,this,true,false,null,undefined,Infinity,NaN,' + 'isNaN,isFinite,decodeURI,decodeURIComponent,encodeURI,' + 'encodeURIComponent,parseInt,parseFloat';
-  var allowedKeywordsRE = new RegExp('^(' + (globalKeyword + ',' + allowedKeywords).replace(/,/g, '\\b|') + '\\b)');
+  var allowedKeywordsRE = void 0;
 
   // keywords that don't make sense inside expressions
-  var improperKeywords = 'break,case,class,catch,const,continue,debugger,default,' + 'delete,do,else,export,extends,finally,for,function,if,' + 'import,in,instanceof,let,return,super,switch,throw,try,' + 'var,while,with,yield,enum,await,implements,package,' + 'protected,static,interface,private,public';
-  var improperKeywordsRE = new RegExp('^(' + improperKeywords.replace(/,/g, '\\b|') + '\\b)');
+  var improperKeywordsRE = new RegExp('^(' + ('break,case,class,catch,const,continue,debugger,default,' + 'delete,do,else,export,extends,finally,for,function,if,' + 'import,in,instanceof,let,return,super,switch,throw,try,' + 'var,while,with,yield,enum,await,implements,package,' + 'protected,static,interface,private,public').replace(/,/g, '\\b|') + '\\b)');
 
   var wsRE = /\s/g;
   var newlineRE = /\n/g;
@@ -177,24 +200,6 @@
   }
 
   /**
-   * Path rewrite replacer
-   *
-   * @param {String} raw
-   * @return {String}
-   */
-
-  function rewrite(raw) {
-    var c = raw.charAt(0);
-    var path = raw.slice(1);
-    if (allowedKeywordsRE.test(path)) {
-      return raw;
-    } else {
-      path = path.indexOf('"') > -1 ? path.replace(restoreRE, restore) : path;
-      return c + scopeKeyword + '.' + path;
-    }
-  }
-
-  /**
    * Restore replacer
    *
    * @param {String} str
@@ -207,105 +212,144 @@
   }
 
   /**
-   * Rewrite an expression, prefixing all path accessors with
-   * `scope.` and generate getter/setter functions.
-   *
-   * @param {String} exp
-   * @return {Function}
-   */
-
-  function compileGetter(exp) {
-    if (improperKeywordsRE.test(exp)) {
-      if (process.env.NODE_ENV !== 'production' && console && console.warn) {
-        console.warn('Avoid using reserved keywords in expression: ' + exp);
-      }
-    }
-    // reset state
-    saved.length = 0;
-    // save strings and object literal keys
-    var body = exp.replace(saveRE, save).replace(wsRE, '');
-    // rewrite all paths
-    // pad 1 space here becaue the regex matches 1 extra char
-    body = (' ' + body).replace(identRE, rewrite).replace(restoreRE, restore);
-    return makeGetterFn(body);
-  }
-
-  /**
-   * Build a getter function. Requires eval.
-   *
-   * We isolate the try/catch so it doesn't affect the
-   * optimization of the parse function when it is not called.
-   *
-   * @param {String} body
-   * @return {Function|undefined}
-   */
-
-  function makeGetterFn(body) {
-    try {
-      /* eslint-disable no-new-func */
-      return new Function(scopeKeyword, globalKeyword, 'return ' + body + ';');
-      /* eslint-enable no-new-func */
-    } catch (e) {
-      if (process.env.NODE_ENV !== 'production' && console && console.warn) {
-        console.warn('Invalid expression. ' + 'Generated function body: ' + body);
-      }
-    }
-  }
-
-  /**
    * Check if an expression is a simple path.
    *
-   * @param {String} exp
+   * @param {String} expr
    * @return {Boolean}
    */
 
-  function isSimplePath(exp) {
-    return pathTestRE.test(exp)
+  function isSimplePath(expr) {
+    return pathTestRE.test(expr)
     // don't treat true/false as paths
-     && !booleanLiteralRE.test(exp); // &&
+     && !booleanLiteralRE.test(expr); // &&
     // Math constants e.g. Math.PI, Math.E etc.
-    // && exp.slice(0, 5) !== 'Math.'
+    // && expr.slice(0, 5) !== 'Math.'
   }
 
   /**
-   * Set global keyword
-   *
-   * @param {String} key
+   * @param {Object} config
+   *   - {Number} cache, default 1000
+   *              limited for Cache
+   *   - {String} global, default "_"
+   *              for global string in parsed expression,
+   * @constructor
    */
 
-  function setGlobal(key) {
-    if (!key) return;
-    globalKeyword = key;
-    allowedKeywordsRE = new RegExp('^(' + (globalKeyword + ',' + allowedKeywords).replace(/,/g, '\\b|') + '\\b)');
-  }
+  var Gep = function () {
+    function Gep() {
+      var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
-  /**
-   * Parse an expression into re-written getter/setters.
-   *
-   * @param {String} exp
-   * @param {Boolean} needSet
-   * @return {Function}
-   */
+      var _ref$cache = _ref.cache;
+      var cache = _ref$cache === undefined ? 1000 : _ref$cache;
+      var _ref$global = _ref.global;
+      var global = _ref$global === undefined ? '_' : _ref$global;
+      babelHelpers.classCallCheck(this, Gep);
 
-  function parseExpression(exp, needSet) {
-    exp = exp.trim();
-    // try cache
-    var hit = expressionCache.get(exp);
-    if (hit) {
-      return hit;
+      this.global = global;
+      this.scope = '$';
+
+      $cache = new Cache(cache);
+      var allowedKeywords = global + ',' + 'Math,Date,this,true,false,null,undefined,Infinity,NaN,' + 'isNaN,isFinite,decodeURI,decodeURIComponent,encodeURI,' + 'encodeURIComponent,parseInt,parseFloat';
+      allowedKeywordsRE = new RegExp('^(' + allowedKeywords.replace(/,/g, '\\b|') + '\\b)');
     }
-    var res = isSimplePath(exp) && exp.indexOf('[') < 0
-    // optimized super simple getter
-    ? makeGetterFn(scopeKeyword + '.' + exp)
-    // dynamic getter
-    : compileGetter(exp);
-    expressionCache.put(exp, res);
-    return res;
-  }
 
-  parseExpression.setGlobal = setGlobal;
+    /**
+     * Rewrite an expression, prefixing all path accessors with
+     * `scope.` and return the new expression.
+     *
+     * @param {String} expr
+     * @return {String}
+     */
 
-  return parseExpression;
+    babelHelpers.createClass(Gep, [{
+      key: 'compile',
+      value: function compile(expr) {
+        var _this = this;
+
+        if (improperKeywordsRE.test(expr)) {
+          if (process.env.NODE_ENV !== 'production' && console && console.warn) {
+            console.warn('Avoid using reserved keywords in expression: ' + expr);
+          }
+        }
+        // reset state
+        saved.length = 0;
+        // save strings and object literal keys
+        var body = expr.replace(saveRE, save).replace(wsRE, '');
+        // rewrite all paths
+        // pad 1 space here becaue the regex matches 1 extra char
+        body = (' ' + body).replace(identRE, function (raw) {
+          var c = raw.charAt(0);
+          var path = raw.slice(1);
+          if (allowedKeywordsRE.test(path)) {
+            return raw;
+          } else {
+            path = path.indexOf('"') > -1 ? path.replace(restoreRE, restore) : path;
+            return c + _this.scope + '.' + path;
+          }
+        }).replace(restoreRE, restore);
+        return body;
+      }
+
+      /**
+       * Build a getter function. Requires eval.
+       *
+       * We isolate the try/catch so it doesn't affect the
+       * optimization of the parse function when it is not called.
+       *
+       * @param {String} body
+       * @return {Function|undefined}
+       */
+
+    }, {
+      key: 'make',
+      value: function make(body) {
+        try {
+          /* eslint-disable no-new-func */
+          return new Function(this.scope, this.global, 'return ' + body + ';');
+          /* eslint-enable no-new-func */
+        } catch (e) {
+          if (process.env.NODE_ENV !== 'production' && console && console.warn) {
+            console.warn('Invalid expression. ' + 'Generated function body: ' + body);
+          }
+        }
+      }
+
+      /**
+       * Parse an expression.
+       *
+       * @param {String} expr
+       * @param {Boolean} toFunc
+       *                  make the parsed expression if true
+       * @return {Function}
+       */
+
+    }, {
+      key: 'parse',
+      value: function parse(expr, toFunc) {
+        if (!(expr && (expr = expr.trim()))) {
+          return '';
+        }
+        // try cache
+        var hit = $cache.get(expr);
+        if (hit) {
+          return hit;
+        }
+        var res = isSimplePath(expr) && expr.indexOf('[') < 0
+        // optimized super simple getter
+        ? this.scope + '.' + expr
+        // dynamic getter
+        : this.compile(expr);
+        $cache.put(expr, res);
+        if (toFunc) {
+          res = this.make(res);
+        }
+        return res;
+      }
+    }]);
+    return Gep;
+  }();
+
+  return Gep;
 
 }));
 //# sourceMappingURL=gep.js.map
