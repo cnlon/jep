@@ -206,7 +206,9 @@ export default class Gep {
    */
 
   parse (expr, toFunc) {
-    expr = expr.trim()
+    if (!(expr && (expr = expr.trim()))) {
+      return ''
+    }
     // try cache
     var hit = $cache.get(expr)
     if (hit) {
