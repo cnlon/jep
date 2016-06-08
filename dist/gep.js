@@ -9,34 +9,6 @@
   (global.gep = factory());
 }(this, function () { 'use strict';
 
-  var babelHelpers = {};
-
-  babelHelpers.classCallCheck = function (instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  };
-
-  babelHelpers.createClass = function () {
-    function defineProperties(target, props) {
-      for (var i = 0; i < props.length; i++) {
-        var descriptor = props[i];
-        descriptor.enumerable = descriptor.enumerable || false;
-        descriptor.configurable = true;
-        if ("value" in descriptor) descriptor.writable = true;
-        Object.defineProperty(target, descriptor.key, descriptor);
-      }
-    }
-
-    return function (Constructor, protoProps, staticProps) {
-      if (protoProps) defineProperties(Constructor.prototype, protoProps);
-      if (staticProps) defineProperties(Constructor, staticProps);
-      return Constructor;
-    };
-  }();
-
-  babelHelpers;
-
   /**
    * A doubly linked list-based Least Recently Used (LRU)
    * cache. Will keep most recently used items while
@@ -151,6 +123,30 @@
     return returnEntry ? entry : entry.value;
   };
 
+  var classCallCheck = function (instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  };
+
+  var createClass = function () {
+    function defineProperties(target, props) {
+      for (var i = 0; i < props.length; i++) {
+        var descriptor = props[i];
+        descriptor.enumerable = descriptor.enumerable || false;
+        descriptor.configurable = true;
+        if ("value" in descriptor) descriptor.writable = true;
+        Object.defineProperty(target, descriptor.key, descriptor);
+      }
+    }
+
+    return function (Constructor, protoProps, staticProps) {
+      if (protoProps) defineProperties(Constructor.prototype, protoProps);
+      if (staticProps) defineProperties(Constructor, staticProps);
+      return Constructor;
+    };
+  }();
+
   var $cache = void 0;
 
   var allowedKeywordsRE = void 0;
@@ -243,7 +239,7 @@
       var cache = _ref$cache === undefined ? 1000 : _ref$cache;
       var _ref$global = _ref.global;
       var global = _ref$global === undefined ? '_' : _ref$global;
-      babelHelpers.classCallCheck(this, Gep);
+      classCallCheck(this, Gep);
 
       this.global = global;
       this.scope = '$';
@@ -261,7 +257,7 @@
      * @return {String}
      */
 
-    babelHelpers.createClass(Gep, [{
+    createClass(Gep, [{
       key: 'compile',
       value: function compile(expr) {
         var _this = this;
@@ -297,12 +293,16 @@
        * optimization of the parse function when it is not called.
        *
        * @param {String} body
-       * @return {Function|undefined}
+       * @param {String} toStr
+       * @return {Function|String|undefined}
        */
 
     }, {
       key: 'make',
-      value: function make(body) {
+      value: function make(body, toStr) {
+        if (toStr) {
+          return 'function(' + this.scope + ',' + this.global + '){' + 'return ' + body + '}';
+        }
         try {
           /* eslint-disable no-new-func */
           return new Function(this.scope, this.global, 'return ' + body + ';');
