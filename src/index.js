@@ -162,7 +162,7 @@ export default class Gep {
         }
       })
       .replace(restoreRE, restore)
-    return body
+    return body.slice(1)
   }
 
   /**
