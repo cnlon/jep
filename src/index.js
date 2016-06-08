@@ -172,10 +172,16 @@ export default class Gep {
    * optimization of the parse function when it is not called.
    *
    * @param {String} body
-   * @return {Function|undefined}
+   * @param {String} toStr
+   * @return {Function|String|undefined}
    */
 
-  make (body) {
+  make (body, toStr) {
+    if (toStr) {
+      return 'function(' + this.scope + ',' + this.global + '){'
+        + 'return ' + body
+        + '}'
+    }
     try {
       /* eslint-disable no-new-func */
       return new Function(
