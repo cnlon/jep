@@ -23,28 +23,25 @@ let scope = {
 }
 
 let expr = 'a===1 ? true : false'
-let parsed = gep.parse(expr)
+let parsed = gep.parse(expr) // String, original expression
 console.log(parsed)
 // $.a===1?true:false
-let func = gep.make(parsed)
-console.log(func.toString())
-// function anonymous($,_
-// /**/) {
-// return $.a===1?true:false;
-// }
+let func = gep.make(parsed) // 1. String, parsed expression
+                            // 2. Boolean, default false, make expression to function
+                            //             if true, and then make function to string
 let res = func(scope)
 console.log(res)
 // true
 ```
 
-with config and global
+with config
 
 ``` javascript
 import Gep from 'gep'
 
 const gep = new Gep({
-  cache: 100, // Number, default 1000
-  global: 'g', // String, default '_'
+  cache: 500, // Number, default 1000, the maximum number for caching expression
+  params: ['$', '$global'], // Array, default ['$'], at least one
 })
 
 let scope = {
@@ -54,16 +51,11 @@ let global = {
   constant: 2,
 }
 
-let expr = 'g.constant * Math.PI * radius'
+let expr = '$global.constant * Math.PI * radius'
 let parsed = gep.parse(expr)
 console.log(parsed)
-// g.constant*Math.PI*$.radius
+// $global.constant*Math.PI*$.radius
 let func = gep.make(parsed)
-console.log(func.toString())
-// function anonymous($,g
-// /**/) {
-// return g.constant*Math.PI*$.radius;
-// }
 let res = func(scope, global)
 console.log(res)
 // 18.84955592153876
@@ -74,7 +66,9 @@ with function
 ``` javascript
 import Gep from 'gep'
 
-const gep = new Gep()
+const gep = new Gep({
+  params: ['$', '_'],
+})
 
 let scope = {
   radius: 3,
@@ -89,14 +83,8 @@ let global = {
   },
 }
 
-let expr = '_.fixed(Math.PI + _.square(radius), 2) + unit'
-let func = gep.parse(expr, true) // and make to function if the second param is true
-console.log(func.toString())
-// function anonymous($,_
-// /**/) {
-// return _.fixed(Math.PI+_.square($.radius),2)+$.unit;
-// }
-let res = func(scope, global)
+let expr = gep.parse('_.fixed(Math.PI + _.square(radius), 2) + unit')
+let res = gep.make(expr)(scope, global)
 console.log(res)
 // 12.14m²
 ```
