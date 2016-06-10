@@ -7,9 +7,9 @@
 
 import Cache from './cache.js'
 
-let $cache
+let $cache, funcParams, funcBefore
 
-let allowedKeywordsRE
+let paramsPrefixRE, allowedKeywordsRE
 
 // keywords that don't make sense inside expressions
 const improperKeywordsRE =
@@ -98,24 +98,44 @@ function isSimplePath (expr) {
  * @param {Object} config
  *   - {Number} cache, default 1000
  *              limited for Cache
- *   - {String} global, default "_"
- *              for global string in parsed expression,
+ *   - {Array} params, default ['$']
+ *              first one is for scope and you can add more params
  * @constructor
  */
 
 export default class Gep {
   constructor ({
     cache = 1000,
-    global = '_',
+    params = ['$'],
   } = {}) {
-    this.global = global
-    this.scope = '$'
+    funcParams = params.join(',')
+    funcBefore = 'function(' + funcParams + '){return '
 
     $cache = new Cache(cache)
-    let allowedKeywords = global + ','
-      + 'Math,Date,this,true,false,null,undefined,Infinity,NaN,'
+
+    this.scope = params[0]
+
+    let paramsPrefix
+    if (params.length > 1) {
+      this.params = params.slice(1)
+      paramsPrefix = this.params.join(',')
+      paramsPrefixRE =
+        new RegExp(
+            '^(?:'
+          + paramsPrefix.replace(/\$/g, '\\$').replace(/,/g, '|')
+          + ')'
+        )
+    } else {
+      this.params = null
+    }
+
+    let allowedKeywords =
+        'Math,Date,this,true,false,null,undefined,Infinity,NaN,'
       + 'isNaN,isFinite,decodeURI,decodeURIComponent,encodeURI,'
       + 'encodeURIComponent,parseInt,parseFloat'
+    if (paramsPrefix) {
+      allowedKeywords = paramsPrefix.replace(/\$/g, '\\$') + ',' + allowedKeywords
+    }
     allowedKeywordsRE =
       new RegExp(
           '^('
@@ -178,25 +198,19 @@ export default class Gep {
 
   make (body, toStr) {
     if (toStr) {
-      return 'function(' + this.scope + ',' + this.global + '){'
-        + 'return ' + body
-        + '}'
+      return funcBefore + body + '}'
     }
     try {
       /* eslint-disable no-new-func */
-      return new Function(
-        this.scope,
-        this.global,
-        'return ' + body + ';'
-      )
+      return new Function(funcParams, 'return ' + body)
       /* eslint-enable no-new-func */
     } catch (e) {
       if (process.env.NODE_ENV !== 'production'
         && console && console.warn
       ) {
         console.warn(
-            'Invalid expression. '
-          + 'Generated function body: ' + body
+          'Invalid expression. Generated function body: '
+          + body
         )
       }
     }
@@ -222,7 +236,7 @@ export default class Gep {
     }
     var res = isSimplePath(expr) && expr.indexOf('[') < 0
       // optimized super simple getter
-      ? expr.indexOf(this.global) === 0
+      ? paramsPrefixRE && paramsPrefixRE.test(expr)
         ? expr
         : this.scope + '.' + expr
       // dynamic getter
