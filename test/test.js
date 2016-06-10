@@ -1,6 +1,8 @@
 var assert = require('chai').assert
 var Gep = require('../dist/gep.js')
-var gep = new Gep()
+const gep = new Gep({
+  params: ['$', '_'],
+})
 
 var equal = assert.equal
 
@@ -20,12 +22,16 @@ describe('gep', function () {
   }
   it('"(_.square(radius) + unit) === \'9m²\' ? true : false" should equal "12.14m²"', function () {
     var expr = '(_.square(radius) + unit) === \'9m²\' ? true : false'
-    var res = gep.parse(expr, true)(scope, global)
+    var parsed = gep.parse(expr)
+    var func = gep.make(parsed)
+    var res = func(scope, global)
     equal(res, true)
   })
   it('"_.fixed(Math.PI + _.square(radius), 2) + unit" should equal "12.14m²"', function () {
     var expr = '_.fixed(Math.PI + _.square(radius), 2) + unit'
-    var res = gep.parse(expr, true)(scope, global)
+    var parsed = gep.parse(expr)
+    var func = gep.make(parsed)
+    var res = func(scope, global)
     equal(res, '12.14m²')
   })
 })
