@@ -148,9 +148,10 @@
   }();
 
   var $cache = void 0;
-
+  var funcParams = void 0;
+  var funcBefore = void 0;
+  var paramsPrefixRE = void 0;
   var allowedKeywordsRE = void 0;
-
   // keywords that don't make sense inside expressions
   var improperKeywordsRE = new RegExp('^(' + ('break,case,class,catch,const,continue,debugger,default,' + 'delete,do,else,export,extends,finally,for,function,if,' + 'import,in,instanceof,let,return,super,switch,throw,try,' + 'var,while,with,yield,enum,await,implements,package,' + 'protected,static,interface,private,public').replace(/,/g, '\\b|') + '\\b)');
 
@@ -226,8 +227,8 @@
    * @param {Object} config
    *   - {Number} cache, default 1000
    *              limited for Cache
-   *   - {String} global, default "_"
-   *              for global string in parsed expression,
+   *   - {Array} params, default ['$']
+   *              first one is for scope and you can add more params
    * @constructor
    */
 
@@ -237,15 +238,30 @@
 
       var _ref$cache = _ref.cache;
       var cache = _ref$cache === undefined ? 1000 : _ref$cache;
-      var _ref$global = _ref.global;
-      var global = _ref$global === undefined ? '_' : _ref$global;
+      var _ref$params = _ref.params;
+      var params = _ref$params === undefined ? ['$'] : _ref$params;
       classCallCheck(this, Gep);
 
-      this.global = global;
-      this.scope = '$';
+      funcParams = params.join(',');
+      funcBefore = 'function(' + funcParams + '){return ';
 
       $cache = new Cache(cache);
-      var allowedKeywords = global + ',' + 'Math,Date,this,true,false,null,undefined,Infinity,NaN,' + 'isNaN,isFinite,decodeURI,decodeURIComponent,encodeURI,' + 'encodeURIComponent,parseInt,parseFloat';
+
+      this.scope = params[0];
+
+      var paramsPrefix = void 0;
+      if (params.length > 1) {
+        this.params = params.slice(1);
+        paramsPrefix = this.params.join(',');
+        paramsPrefixRE = new RegExp('^(?:' + paramsPrefix.replace(/\$/g, '\\$').replace(/,/g, '|') + ')');
+      } else {
+        this.params = null;
+      }
+
+      var allowedKeywords = 'Math,Date,this,true,false,null,undefined,Infinity,NaN,' + 'isNaN,isFinite,decodeURI,decodeURIComponent,encodeURI,' + 'encodeURIComponent,parseInt,parseFloat';
+      if (paramsPrefix) {
+        allowedKeywords = paramsPrefix.replace(/\$/g, '\\$') + ',' + allowedKeywords;
+      }
       allowedKeywordsRE = new RegExp('^(' + allowedKeywords.replace(/,/g, '\\b|') + '\\b)');
     }
 
@@ -270,7 +286,7 @@
         // reset state
         saved.length = 0;
         // save strings and object literal keys
-        var body = expr.replace(saveRE, save).replace(wsRE, '');
+        var body = expr.replace(saveRE, save);
         // rewrite all paths
         // pad 1 space here becaue the regex matches 1 extra char
         body = (' ' + body).replace(identRE, function (raw) {
@@ -301,15 +317,15 @@
       key: 'make',
       value: function make(body, toStr) {
         if (toStr) {
-          return 'function(' + this.scope + ',' + this.global + '){' + 'return ' + body + '}';
+          return funcBefore + body + '}';
         }
         try {
           /* eslint-disable no-new-func */
-          return new Function(this.scope, this.global, 'return ' + body + ';');
+          return new Function(funcParams, 'return ' + body);
           /* eslint-enable no-new-func */
         } catch (e) {
           if (process.env.NODE_ENV !== 'production' && console && console.warn) {
-            console.warn('Invalid expression. ' + 'Generated function body: ' + body);
+            console.warn('Invalid expression. Generated function body: ' + body);
           }
         }
       }
@@ -318,15 +334,13 @@
        * Parse an expression.
        *
        * @param {String} expr
-       * @param {Boolean} toFunc
-       *                  make the parsed expression if true
        * @return {Function}
        */
 
     }, {
       key: 'parse',
-      value: function parse(expr, toFunc) {
-        if (!(expr && (expr = expr.trim()))) {
+      value: function parse(expr) {
+        if (!(expr && (expr = expr.replace(wsRE, '')))) {
           return '';
         }
         // try cache
@@ -336,13 +350,10 @@
         }
         var res = isSimplePath(expr) && expr.indexOf('[') < 0
         // optimized super simple getter
-        ? expr.indexOf(this.global) === 0 ? expr : this.scope + '.' + expr
+        ? paramsPrefixRE && paramsPrefixRE.test(expr) ? expr : this.scope + '.' + expr
         // dynamic getter
         : this.compile(expr);
         $cache.put(expr, res);
-        if (toFunc) {
-          res = this.make(res);
-        }
         return res;
       }
     }]);
