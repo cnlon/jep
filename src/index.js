@@ -220,12 +220,10 @@ export default class Gep {
    * Parse an expression.
    *
    * @param {String} expr
-   * @param {Boolean} toFunc
-   *                  make the parsed expression if true
    * @return {Function}
    */
 
-  parse (expr, toFunc) {
+  parse (expr) {
     if (!(expr && (expr = expr.trim()))) {
       return ''
     }
@@ -242,9 +240,6 @@ export default class Gep {
       // dynamic getter
       : this.compile(expr)
     $cache.put(expr, res)
-    if (toFunc) {
-      res = this.make(res)
-    }
     return res
   }
 }
