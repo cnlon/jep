@@ -283,7 +283,7 @@
             return c + _this.scope + '.' + path;
           }
         }).replace(restoreRE, restore);
-        return body;
+        return body.slice(1);
       }
 
       /**
@@ -336,7 +336,7 @@
         }
         var res = isSimplePath(expr) && expr.indexOf('[') < 0
         // optimized super simple getter
-        ? this.scope + '.' + expr
+        ? expr.indexOf(this.global) === 0 ? expr : this.scope + '.' + expr
         // dynamic getter
         : this.compile(expr);
         $cache.put(expr, res);
