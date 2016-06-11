@@ -7,6 +7,11 @@
 
 import Cache from './cache.js'
 
+const defaultAllowedKeywords =
+        'Math,Date,this,true,false,null,undefined,Infinity,NaN,'
+      + 'isNaN,isFinite,decodeURI,decodeURIComponent,encodeURI,'
+      + 'encodeURIComponent,parseInt,parseFloat'
+
 // keywords that don't make sense inside expressions
 const improperKeywordsRE =
   new RegExp(
@@ -56,7 +61,7 @@ let saved = []
  */
 
 function save (str, isString) {
-  var i = saved.length
+  let i = saved.length
   saved[i] = isString
     ? str.replace(newlineRE, '\\n')
     : str
@@ -91,6 +96,24 @@ function isSimplePath (expr) {
 }
 
 /**
+ * Check if an expression is a simple path.
+ *
+ * @param {String} expr
+ * @return {Boolean}
+ */
+
+function parseKeywordsToRE (keywords) {
+  return new RegExp(
+        '^(?:'
+      + keywords
+        .replace(wsRE, '')
+        .replace(/\$/g, '\\$')
+        .replace(/,/g, '\\b|')
+      + '\\b)'
+    )
+}
+
+/**
  * @param {Object} config
  *   - {Number} cache, default 1000
  *              limited for Cache
@@ -102,41 +125,61 @@ function isSimplePath (expr) {
 export default class Gep {
   constructor ({
     cache = 1000,
-    params = ['$'],
+    scope = '$',
+    scopes,
+    params = scopes
+           ? Object.keys(scopes).unshift(scope)
+           : [scope],
   } = {}) {
     this._cache = new Cache(cache)
-    this._funcParams = params.join(',')
+
+    this._funcParams = params.join(',').replace(wsRE, '')
     this._funcBefore = 'function(' + this._funcParams + '){return '
 
-    this.scope = params[0]
+    this.scope = scope
+
+    if (scopes) {
+      let keywords
+      Object.keys(scopes).forEach(key => {
+        keywords = scopes[key]
+        if (Array.isArray(keywords)) {
+          keywords = keywords.join(',')
+        }
+        scopes[key] = parseKeywordsToRE(keywords)
+      })
+      this._scopeREs = scopes
+    }
 
     let paramsPrefix
     if (params.length > 1) {
-      this.params = params.slice(1)
-      paramsPrefix = this.params.join(',')
-      this.paramsPrefixRE =
-        new RegExp(
-            '^(?:'
-          + paramsPrefix.replace(/\$/g, '\\$').replace(/,/g, '|')
-          + ')'
-        )
-    } else {
-      this.params = null
+      params = params.slice(1)
+      paramsPrefix = params.join(',')
+      this._paramsPrefixRE = parseKeywordsToRE(paramsPrefix)
     }
 
-    let allowedKeywords =
-        'Math,Date,this,true,false,null,undefined,Infinity,NaN,'
-      + 'isNaN,isFinite,decodeURI,decodeURIComponent,encodeURI,'
-      + 'encodeURIComponent,parseInt,parseFloat'
-    if (paramsPrefix) {
-      allowedKeywords = paramsPrefix.replace(/\$/g, '\\$') + ',' + allowedKeywords
+    let allowedKeywords = paramsPrefix
+                        ? paramsPrefix
+                          + ','
+                          + defaultAllowedKeywords
+                        : defaultAllowedKeywords
+    this._allowedKeywordsRE = parseKeywordsToRE(allowedKeywords)
+  }
+
+  _addScope (expr) {
+    if (this._paramsPrefixRE && this._paramsPrefixRE.test(expr)) {
+      return expr
     }
-    this._allowedKeywordsRE =
-      new RegExp(
-          '^('
-        + (allowedKeywords).replace(/,/g, '\\b|')
-        + '\\b)'
-      )
+    if (this._scopeREs) {
+      let keys = Object.keys(this._scopeREs)
+      let re
+      for (let i = 0, l = keys.length; i < l; i++) {
+        re = this._scopeREs[keys[i]]
+        if (re.test(expr)) {
+          return keys[i] + '.' + expr
+        }
+      }
+    }
+    return this.scope + '.' + expr
   }
 
   /**
@@ -171,7 +214,7 @@ export default class Gep {
           path = path.indexOf('"') > -1
             ? path.replace(restoreRE, restore)
             : path
-          return c + this.scope + '.' + path
+          return c + this._addScope(path)
         }
       })
       .replace(restoreRE, restore)
@@ -202,7 +245,7 @@ export default class Gep {
         && console && console.warn
       ) {
         console.warn(
-          'Invalid expression. Generated function body: '
+            'Invalid expression. Generated function body: '
           + body
         )
       }
@@ -221,15 +264,12 @@ export default class Gep {
       return ''
     }
     // try cache
-    var hit = this._cache.get(expr)
+    let hit = this._cache.get(expr)
     if (hit) {
       return hit
     }
-    var res = isSimplePath(expr) && expr.indexOf('[') < 0
-      // optimized super simple getter
-      ? this.paramsPrefixRE && this.paramsPrefixRE.test(expr)
-        ? expr
-        : this.scope + '.' + expr
+    let res = isSimplePath(expr) && expr.indexOf('[') < 0
+      ? this._addScope(expr)
       // dynamic getter
       : this.compile(expr)
     this._cache.put(expr, res)
