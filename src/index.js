@@ -7,10 +7,6 @@
 
 import Cache from './cache.js'
 
-let $cache, funcParams, funcBefore
-
-let paramsPrefixRE, allowedKeywordsRE
-
 // keywords that don't make sense inside expressions
 const improperKeywordsRE =
   new RegExp(
@@ -108,10 +104,9 @@ export default class Gep {
     cache = 1000,
     params = ['$'],
   } = {}) {
-    funcParams = params.join(',')
-    funcBefore = 'function(' + funcParams + '){return '
-
-    $cache = new Cache(cache)
+    this._cache = new Cache(cache)
+    this._funcParams = params.join(',')
+    this._funcBefore = 'function(' + this._funcParams + '){return '
 
     this.scope = params[0]
 
@@ -119,7 +114,7 @@ export default class Gep {
     if (params.length > 1) {
       this.params = params.slice(1)
       paramsPrefix = this.params.join(',')
-      paramsPrefixRE =
+      this.paramsPrefixRE =
         new RegExp(
             '^(?:'
           + paramsPrefix.replace(/\$/g, '\\$').replace(/,/g, '|')
@@ -136,7 +131,7 @@ export default class Gep {
     if (paramsPrefix) {
       allowedKeywords = paramsPrefix.replace(/\$/g, '\\$') + ',' + allowedKeywords
     }
-    allowedKeywordsRE =
+    this._allowedKeywordsRE =
       new RegExp(
           '^('
         + (allowedKeywords).replace(/,/g, '\\b|')
@@ -170,7 +165,7 @@ export default class Gep {
       .replace(identRE, (raw) => {
         let c = raw.charAt(0)
         let path = raw.slice(1)
-        if (allowedKeywordsRE.test(path)) {
+        if (this._allowedKeywordsRE.test(path)) {
           return raw
         } else {
           path = path.indexOf('"') > -1
@@ -196,11 +191,11 @@ export default class Gep {
 
   make (body, toStr) {
     if (toStr) {
-      return funcBefore + body + '}'
+      return this._funcBefore + body + '}'
     }
     try {
       /* eslint-disable no-new-func */
-      return new Function(funcParams, 'return ' + body)
+      return new Function(this._funcParams, 'return ' + body)
       /* eslint-enable no-new-func */
     } catch (e) {
       if (process.env.NODE_ENV !== 'production'
@@ -226,18 +221,18 @@ export default class Gep {
       return ''
     }
     // try cache
-    var hit = $cache.get(expr)
+    var hit = this._cache.get(expr)
     if (hit) {
       return hit
     }
     var res = isSimplePath(expr) && expr.indexOf('[') < 0
       // optimized super simple getter
-      ? paramsPrefixRE && paramsPrefixRE.test(expr)
+      ? this.paramsPrefixRE && this.paramsPrefixRE.test(expr)
         ? expr
         : this.scope + '.' + expr
       // dynamic getter
       : this.compile(expr)
-    $cache.put(expr, res)
+    this._cache.put(expr, res)
     return res
   }
 }
