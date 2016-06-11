@@ -147,11 +147,6 @@
     };
   }();
 
-  var $cache = void 0;
-  var funcParams = void 0;
-  var funcBefore = void 0;
-  var paramsPrefixRE = void 0;
-  var allowedKeywordsRE = void 0;
   // keywords that don't make sense inside expressions
   var improperKeywordsRE = new RegExp('^(' + ('break,case,class,catch,const,continue,debugger,default,' + 'delete,do,else,export,extends,finally,for,function,if,' + 'import,in,instanceof,let,return,super,switch,throw,try,' + 'var,while,with,yield,enum,await,implements,package,' + 'protected,static,interface,private,public').replace(/,/g, '\\b|') + '\\b)');
 
@@ -242,10 +237,9 @@
       var params = _ref$params === undefined ? ['$'] : _ref$params;
       classCallCheck(this, Gep);
 
-      funcParams = params.join(',');
-      funcBefore = 'function(' + funcParams + '){return ';
-
-      $cache = new Cache(cache);
+      this._cache = new Cache(cache);
+      this._funcParams = params.join(',');
+      this._funcBefore = 'function(' + this._funcParams + '){return ';
 
       this.scope = params[0];
 
@@ -253,7 +247,7 @@
       if (params.length > 1) {
         this.params = params.slice(1);
         paramsPrefix = this.params.join(',');
-        paramsPrefixRE = new RegExp('^(?:' + paramsPrefix.replace(/\$/g, '\\$').replace(/,/g, '|') + ')');
+        this.paramsPrefixRE = new RegExp('^(?:' + paramsPrefix.replace(/\$/g, '\\$').replace(/,/g, '|') + ')');
       } else {
         this.params = null;
       }
@@ -262,7 +256,7 @@
       if (paramsPrefix) {
         allowedKeywords = paramsPrefix.replace(/\$/g, '\\$') + ',' + allowedKeywords;
       }
-      allowedKeywordsRE = new RegExp('^(' + allowedKeywords.replace(/,/g, '\\b|') + '\\b)');
+      this._allowedKeywordsRE = new RegExp('^(' + allowedKeywords.replace(/,/g, '\\b|') + '\\b)');
     }
 
     /**
@@ -292,7 +286,7 @@
         body = (' ' + body).replace(identRE, function (raw) {
           var c = raw.charAt(0);
           var path = raw.slice(1);
-          if (allowedKeywordsRE.test(path)) {
+          if (_this._allowedKeywordsRE.test(path)) {
             return raw;
           } else {
             path = path.indexOf('"') > -1 ? path.replace(restoreRE, restore) : path;
@@ -317,11 +311,11 @@
       key: 'make',
       value: function make(body, toStr) {
         if (toStr) {
-          return funcBefore + body + '}';
+          return this._funcBefore + body + '}';
         }
         try {
           /* eslint-disable no-new-func */
-          return new Function(funcParams, 'return ' + body);
+          return new Function(this._funcParams, 'return ' + body);
           /* eslint-enable no-new-func */
         } catch (e) {
           if (process.env.NODE_ENV !== 'production' && console && console.warn) {
@@ -344,16 +338,16 @@
           return '';
         }
         // try cache
-        var hit = $cache.get(expr);
+        var hit = this._cache.get(expr);
         if (hit) {
           return hit;
         }
         var res = isSimplePath(expr) && expr.indexOf('[') < 0
         // optimized super simple getter
-        ? paramsPrefixRE && paramsPrefixRE.test(expr) ? expr : this.scope + '.' + expr
+        ? this.paramsPrefixRE && this.paramsPrefixRE.test(expr) ? expr : this.scope + '.' + expr
         // dynamic getter
         : this.compile(expr);
-        $cache.put(expr, res);
+        this._cache.put(expr, res);
         return res;
       }
     }]);
