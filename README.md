@@ -41,40 +41,50 @@ import Gep from 'gep'
 
 const gep = new Gep({
   cache: 500, // Number, default 1000, the maximum number for caching expression
-  params: ['$', '$global'], // Array, default ['$'], at least one
+  scope: '$', // String, default '$'
+  scopes: {   // Object, it's sub scopes
+    units: ['meter', 'squareMeter'], // key is sub scope name
+                                     // value is an array of keywords
+  },
+  params: ['$', 'units'], // Array, default contains '$' and scopes's keys
+                          //        it's the order of params for calling the
+                          //        function made by method make
 })
 
+const units = {
+  meter: 'm',
+}
 let scope = {
   radius: 3,
 }
-let global = {
-  constant: 2,
-}
 
-let expr = '$global.constant * Math.PI * radius'
+let expr = '(2 * Math.PI * radius).toFixed(2) + meter'
 let parsed = gep.parse(expr)
 console.log(parsed)
-// $global.constant*Math.PI*$.radius
+// (2*Math.PI*$.radius).toFixed(2)+units.meter
 let func = gep.make(parsed)
-let res = func(scope, global)
+let res = func(scope, units)
 console.log(res)
-// 18.84955592153876
+// 18.85m
 ```
 
-with function
+with function and constant
 
 ``` javascript
 import Gep from 'gep'
 
 const gep = new Gep({
-  params: ['$', '_'],
+  scopes: {
+    units: ['meter', 'squareMeter'],
+  },
+  params: ['$', 'units', 'methods'], // if param is not in scopes, it will not be prefixed
 })
 
-let scope = {
-  radius: 3,
-  unit: 'm²',
+const units = {
+  meter: 'm',
+  squareMeter: 'm²',
 }
-let global = {
+const methods = {
   square (n) {
     return n * n
   },
@@ -82,9 +92,12 @@ let global = {
     return numObj.toFixed(num)
   },
 }
+let scope = {
+  radius: 3,
+}
 
-let expr = gep.parse('_.fixed(Math.PI + _.square(radius), 2) + unit')
-let res = gep.make(expr)(scope, global)
+let expr = gep.parse('methods.fixed(Math.PI + methods.square(radius), 2) + squareMeter')
+let res = gep.make(expr)(scope, units, methods)
 console.log(res)
 // 12.14m²
 ```
