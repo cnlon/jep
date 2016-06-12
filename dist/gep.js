@@ -147,6 +147,8 @@
     };
   }();
 
+  var defaultAllowedKeywords = 'Math,Date,this,true,false,null,undefined,Infinity,NaN,' + 'isNaN,isFinite,decodeURI,decodeURIComponent,encodeURI,' + 'encodeURIComponent,parseInt,parseFloat';
+
   // keywords that don't make sense inside expressions
   var improperKeywordsRE = new RegExp('^(' + ('break,case,class,catch,const,continue,debugger,default,' + 'delete,do,else,export,extends,finally,for,function,if,' + 'import,in,instanceof,let,return,super,switch,throw,try,' + 'var,while,with,yield,enum,await,implements,package,' + 'protected,static,interface,private,public').replace(/,/g, '\\b|') + '\\b)');
 
@@ -219,6 +221,17 @@
   }
 
   /**
+   * Check if an expression is a simple path.
+   *
+   * @param {String} expr
+   * @return {Boolean}
+   */
+
+  function parseKeywordsToRE(keywords) {
+    return new RegExp('^(?:' + keywords.replace(wsRE, '').replace(/\$/g, '\\$').replace(/,/g, '\\b|') + '\\b)');
+  }
+
+  /**
    * @param {Object} config
    *   - {Number} cache, default 1000
    *              limited for Cache
@@ -229,48 +242,82 @@
 
   var Gep = function () {
     function Gep() {
+      var _this = this;
+
       var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
       var _ref$cache = _ref.cache;
       var cache = _ref$cache === undefined ? 1000 : _ref$cache;
+      var _ref$scope = _ref.scope;
+      var scope = _ref$scope === undefined ? '$' : _ref$scope;
+      var scopes = _ref.scopes;
       var _ref$params = _ref.params;
-      var params = _ref$params === undefined ? ['$'] : _ref$params;
+      var params = _ref$params === undefined ? scopes ? Object.keys(scopes).unshift(scope) : [scope] : _ref$params;
       classCallCheck(this, Gep);
 
       this._cache = new Cache(cache);
-      this._funcParams = params.join(',');
+
+      this._funcParams = params.join(',').replace(wsRE, '');
       this._funcBefore = 'function(' + this._funcParams + '){return ';
 
-      this.scope = params[0];
+      this.scope = scope;
+
+      if (scopes) {
+        (function () {
+          var keywords = void 0;
+          Object.keys(scopes).forEach(function (key) {
+            keywords = scopes[key];
+            if (Array.isArray(keywords)) {
+              keywords = keywords.join(',');
+            }
+            scopes[key] = parseKeywordsToRE(keywords);
+          });
+          _this._scopeREs = scopes;
+        })();
+      }
 
       var paramsPrefix = void 0;
       if (params.length > 1) {
-        this.params = params.slice(1);
-        paramsPrefix = this.params.join(',');
-        this.paramsPrefixRE = new RegExp('^(?:' + paramsPrefix.replace(/\$/g, '\\$').replace(/,/g, '|') + ')');
-      } else {
-        this.params = null;
+        params = params.slice(1);
+        paramsPrefix = params.join(',');
+        this._paramsPrefixRE = parseKeywordsToRE(paramsPrefix);
       }
 
-      var allowedKeywords = 'Math,Date,this,true,false,null,undefined,Infinity,NaN,' + 'isNaN,isFinite,decodeURI,decodeURIComponent,encodeURI,' + 'encodeURIComponent,parseInt,parseFloat';
-      if (paramsPrefix) {
-        allowedKeywords = paramsPrefix.replace(/\$/g, '\\$') + ',' + allowedKeywords;
-      }
-      this._allowedKeywordsRE = new RegExp('^(' + allowedKeywords.replace(/,/g, '\\b|') + '\\b)');
+      var allowedKeywords = paramsPrefix ? paramsPrefix + ',' + defaultAllowedKeywords : defaultAllowedKeywords;
+      this._allowedKeywordsRE = parseKeywordsToRE(allowedKeywords);
     }
 
-    /**
-     * Rewrite an expression, prefixing all path accessors with
-     * `scope.` and return the new expression.
-     *
-     * @param {String} expr
-     * @return {String}
-     */
-
     createClass(Gep, [{
+      key: '_addScope',
+      value: function _addScope(expr) {
+        if (this._paramsPrefixRE && this._paramsPrefixRE.test(expr)) {
+          return expr;
+        }
+        if (this._scopeREs) {
+          var keys = Object.keys(this._scopeREs);
+          var re = void 0;
+          for (var i = 0, l = keys.length; i < l; i++) {
+            re = this._scopeREs[keys[i]];
+            if (re.test(expr)) {
+              return keys[i] + '.' + expr;
+            }
+          }
+        }
+        return this.scope + '.' + expr;
+      }
+
+      /**
+       * Rewrite an expression, prefixing all path accessors with
+       * `scope.` and return the new expression.
+       *
+       * @param {String} expr
+       * @return {String}
+       */
+
+    }, {
       key: 'compile',
       value: function compile(expr) {
-        var _this = this;
+        var _this2 = this;
 
         if (improperKeywordsRE.test(expr)) {
           if (process.env.NODE_ENV !== 'production' && console && console.warn) {
@@ -286,11 +333,11 @@
         body = (' ' + body).replace(identRE, function (raw) {
           var c = raw.charAt(0);
           var path = raw.slice(1);
-          if (_this._allowedKeywordsRE.test(path)) {
+          if (_this2._allowedKeywordsRE.test(path)) {
             return raw;
           } else {
             path = path.indexOf('"') > -1 ? path.replace(restoreRE, restore) : path;
-            return c + _this.scope + '.' + path;
+            return c + _this2._addScope(path);
           }
         }).replace(restoreRE, restore);
         return body.slice(1);
@@ -342,9 +389,7 @@
         if (hit) {
           return hit;
         }
-        var res = isSimplePath(expr) && expr.indexOf('[') < 0
-        // optimized super simple getter
-        ? this.paramsPrefixRE && this.paramsPrefixRE.test(expr) ? expr : this.scope + '.' + expr
+        var res = isSimplePath(expr) && expr.indexOf('[') < 0 ? this._addScope(expr)
         // dynamic getter
         : this.compile(expr);
         this._cache.put(expr, res);
