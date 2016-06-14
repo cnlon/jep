@@ -201,7 +201,9 @@ export default class Gep {
     // reset state
     saved.length = 0
     // save strings and object literal keys
-    let body = expr.replace(saveRE, save)
+    let body = expr
+      .replace(saveRE, save)
+      .replace(wsRE, '')
     // rewrite all paths
     // pad 1 space here becaue the regex matches 1 extra char
     body = (' ' + body)
@@ -260,7 +262,7 @@ export default class Gep {
    */
 
   parse (expr) {
-    if (!(expr && (expr = expr.replace(wsRE, '')))) {
+    if (!(expr && (expr = expr.trim()))) {
       return ''
     }
     // try cache
