@@ -127,10 +127,16 @@ export default class Gep {
     cache = 1000,
     scope = '$',
     scopes,
-    params = scopes
-           ? Object.keys(scopes).unshift(scope)
-           : [scope],
+    params,
   } = {}) {
+    if (!params) {
+      if (scopes) {
+        params = Object.keys(scopes)
+        params.unshift(scope)
+      } else {
+        params = [scope]
+      }
+    }
     this._cache = new Cache(cache)
 
     this._funcParams = params.join(',').replace(wsRE, '')
