@@ -251,10 +251,17 @@
       var _ref$scope = _ref.scope;
       var scope = _ref$scope === undefined ? '$' : _ref$scope;
       var scopes = _ref.scopes;
-      var _ref$params = _ref.params;
-      var params = _ref$params === undefined ? scopes ? Object.keys(scopes).unshift(scope) : [scope] : _ref$params;
+      var params = _ref.params;
       classCallCheck(this, Gep);
 
+      if (!params) {
+        if (scopes) {
+          params = Object.keys(scopes);
+          params.unshift(scope);
+        } else {
+          params = [scope];
+        }
+      }
       this._cache = new Cache(cache);
 
       this._funcParams = params.join(',').replace(wsRE, '');
@@ -327,7 +334,7 @@
         // reset state
         saved.length = 0;
         // save strings and object literal keys
-        var body = expr.replace(saveRE, save);
+        var body = expr.replace(saveRE, save).replace(wsRE, '');
         // rewrite all paths
         // pad 1 space here becaue the regex matches 1 extra char
         body = (' ' + body).replace(identRE, function (raw) {
@@ -381,7 +388,7 @@
     }, {
       key: 'parse',
       value: function parse(expr) {
-        if (!(expr && (expr = expr.replace(wsRE, '')))) {
+        if (!(expr && (expr = expr.trim()))) {
           return '';
         }
         // try cache
