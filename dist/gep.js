@@ -1,6 +1,6 @@
 /**
  * gep --- By longhao <longhaohe@gmail.com> (http://longhaohe.com/)
- * Github: https://github.com/longhaohe/gep
+ * Github: https://github.com/lon3/gep
  * MIT Licensed.
  */
 (function (global, factory) {

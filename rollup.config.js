@@ -35,7 +35,7 @@ export default {
   banner:
 `/**
  * ${name} --- By longhao <longhaohe@gmail.com> (http://longhaohe.com/)
- * Github: https://github.com/longhaohe/${name}
+ * Github: https://github.com/lon3/${name}
  * MIT Licensed.
  */`,
 }
