@@ -2,7 +2,7 @@
 
 General Expression Parser
 
-[![Build Status](https://travis-ci.org/lon3/gep.svg?branch=master)](https://travis-ci.org/lon3/gep)
+[![Build Status](https://travis-ci.org/cnlon/gep.svg?branch=master)](https://travis-ci.org/cnlon/gep)
 [![npm version](https://badge.fury.io/js/gep.svg)](https://badge.fury.io/js/gep)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com)
 
@@ -119,5 +119,3 @@ Excellent! You've come to the right place.
 ## License
 
 [MIT](http://opensource.org/licenses/MIT)
-
-Copyright (c) 2016 longhao

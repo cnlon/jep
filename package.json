@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lon3/gep.git"
+    "url": "git+https://github.com/cnlon/gep.git"
   },
   "keywords": [
     "gep"
@@ -21,9 +21,9 @@
   "author": "longhao he <longhaohe@gmail.com> (http://longhaohe.com/)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/lon3/gep/issues"
+    "url": "https://github.com/cnlon/gep/issues"
   },
-  "homepage": "https://github.com/lon3/gep#readme",
+  "homepage": "https://github.com/cnlon/gep#readme",
   "devDependencies": {
     "babel-core": "^6.9.0",
     "babel-preset-es2015": "^6.9.0",

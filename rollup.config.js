@@ -34,8 +34,8 @@ export default {
   plugins,
   banner:
 `/**
- * ${name} --- By longhao <longhaohe@gmail.com> (http://longhaohe.com/)
- * Github: https://github.com/lon3/${name}
+ * ${name} --- By lon
+ * Github: https://github.com/cnlon/${name}
  * MIT Licensed.
  */`,
 }
