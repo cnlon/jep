@@ -9,6 +9,13 @@
 ``` bash
 npm install --save gep
 ```
+
+or
+
+``` bash
+bower install --save gep
+```
+
 ## Usage
 
 #### Simple usage
