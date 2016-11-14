@@ -1,4 +1,7 @@
-node_modules
-npm-debug.log*
+.DS_Store
+.vscode/
+node_modules/
+npm-debug.log
+yarn-error.log
 coverage
-dev/dev.js*
+dev/dev.js
