@@ -5,7 +5,7 @@
  * reached. This is a bare-bone version of
  * Rasmus Andersson's js-lru:
  *
- *   https://github.com/rsms/js-lru
+ * https://github.com/rsms/js-lru
  *
  * @param {Number} limit
  * @constructor

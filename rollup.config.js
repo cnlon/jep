@@ -34,8 +34,6 @@ export default {
   plugins,
   banner:
 `/**
- * ${name} --- By lon
- * Github: https://github.com/cnlon/${name}
- * MIT Licensed.
+ * https://github.com/cnlon/${name}
  */`,
 }

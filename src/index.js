@@ -1,8 +1,6 @@
 /**
  * Come from Vue.js v1.0.24
- *
- *   https://github.com/vuejs/vue
- *
+ * https://github.com/vuejs/vue
  */
 
 import Cache from './cache.js'
