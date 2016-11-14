@@ -18,18 +18,18 @@ import Gep from 'gep'
 
 const gep = new Gep()
 
-let scope = {
+const scope = {
   a: 1,
 }
 
-let expr = 'a===1 ? true : false'
-let parsed = gep.parse(expr) // String, original expression
+const expr = 'a===1 ? true : false'
+const parsed = gep.parse(expr) // String, original expression
 console.log(parsed)
 // $.a===1?true:false
-let func = gep.make(parsed) // 1. String, parsed expression
+const func = gep.make(parsed) // 1. String, parsed expression
                             // 2. Boolean, default false, make expression to function
                             //             if true, and then make function to string
-let res = func(scope)
+const res = func(scope)
 console.log(res)
 // true
 ```
@@ -54,16 +54,16 @@ const gep = new Gep({
 const units = {
   meter: 'm',
 }
-let scope = {
+const scope = {
   radius: 3,
 }
 
-let expr = '(2 * Math.PI * radius).toFixed(2) + meter'
-let parsed = gep.parse(expr)
+const expr = '(2 * Math.PI * radius).toFixed(2) + meter'
+const parsed = gep.parse(expr)
 console.log(parsed)
 // (2*Math.PI*$.radius).toFixed(2)+units.meter
-let func = gep.make(parsed)
-let res = func(scope, units)
+const func = gep.make(parsed)
+const res = func(scope, units)
 console.log(res)
 // 18.85m
 ```
@@ -92,12 +92,12 @@ const methods = {
     return numObj.toFixed(num)
   },
 }
-let scope = {
+const scope = {
   radius: 3,
 }
 
-let expr = gep.parse('methods.fixed(Math.PI + methods.square(radius), 2) + squareMeter')
-let res = gep.make(expr)(scope, units, methods)
+const expr = gep.parse('methods.fixed(Math.PI + methods.square(radius), 2) + squareMeter')
+const res = gep.make(expr)(scope, units, methods)
 console.log(res)
 // 12.14m²
 ```

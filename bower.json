@@ -1,0 +1,23 @@
+{
+  "name": "gep",
+  "description": "Gep (General Expression Parser) is tiny library used to evaluate expression to javascript function",
+  "main": "gep.js",
+  "authors": [
+    "lon <longhaohe@gmail.com>"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "eval",
+    "evaluate",
+    "expression",
+    "parse",
+    "parser"
+  ],
+  "homepage": "https://github.com/cnlon/gep",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "*.test.js"
+  ]
+}

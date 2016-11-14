@@ -1,5 +1,6 @@
-var assert = require('chai').assert
-var Gep = require('../dist/gep.js')
+const assert = require('chai').assert
+const Gep = require(process.env.FILE || './gep.js')
+console.warn(process.env.FILE)
 const gep = new Gep({
   scopes: {
     'units': 'squareMeter',
@@ -7,17 +8,17 @@ const gep = new Gep({
   params: ['$', 'units', 'methods'],
 })
 
-var equal = assert.equal
+const equal = assert.equal
 
 /* global describe, it */
 describe('gep', function () {
-  var scope = {
+  const scope = {
     radius: 3,
   }
-  var units = {
+  const units = {
     squareMeter: 'm²',
   }
-  var methods = {
+  const methods = {
     square: function (n) {
       return n * n
     },
@@ -26,17 +27,17 @@ describe('gep', function () {
     },
   }
   it('"(methods.square(radius) + squareMeter) === \'9m²\' ? true : false" should equal "12.14m²"', function () {
-    var expr = '(methods.square(radius) + squareMeter) === \'9m²\' ? true : false'
-    var parsed = gep.parse(expr)
-    var func = gep.make(parsed)
-    var res = func(scope, units, methods)
+    const expr = '(methods.square(radius) + squareMeter) === \'9m²\' ? true : false'
+    const parsed = gep.parse(expr)
+    const func = gep.make(parsed)
+    const res = func(scope, units, methods)
     equal(res, true)
   })
   it('"methods.fixed(Math.PI + methods.square(radius), 2) + squareMeter" should equal "12.14m²"', function () {
-    var expr = 'methods.fixed(Math.PI + methods.square(radius), 2) + squareMeter'
-    var parsed = gep.parse(expr)
-    var func = gep.make(parsed)
-    var res = func(scope, units, methods)
+    const expr = 'methods.fixed(Math.PI + methods.square(radius), 2) + squareMeter'
+    const parsed = gep.parse(expr)
+    const func = gep.make(parsed)
+    const res = func(scope, units, methods)
     equal(res, '12.14m²')
   })
 })
