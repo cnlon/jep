@@ -1,6 +1,4 @@
-# gep
-
-General Expression Parser
+# General Expression Parser
 
 [![Build Status](https://travis-ci.org/cnlon/gep.svg?branch=master)](https://travis-ci.org/cnlon/gep)
 [![npm version](https://badge.fury.io/js/gep.svg)](https://badge.fury.io/js/gep)
@@ -12,6 +10,10 @@ General Expression Parser
 npm install --save gep
 ```
 ## Usage
+
+#### Simple usage
+
+try: [CodePen](http://codepen.io/lon/pen/xROVjv?editors=0010#0) [JSFiddle](https://jsfiddle.net/lon/6uz0nd8h/)
 
 ``` javascript
 import Gep from 'gep'
@@ -27,14 +29,16 @@ const parsed = gep.parse(expr) // String, original expression
 console.log(parsed)
 // $.a===1?true:false
 const func = gep.make(parsed) // 1. String, parsed expression
-                            // 2. Boolean, default false, make expression to function
-                            //             if true, and then make function to string
+                              // 2. Boolean, default false, make expression to function
+                              //             if true, and then make function to string
 const res = func(scope)
 console.log(res)
 // true
 ```
 
-with config
+#### With config
+
+try: [CodePen](http://codepen.io/lon/pen/mOEEXx?editors=0010#0) [JSFiddle](https://jsfiddle.net/lon/ko37n7Lc/)
 
 ``` javascript
 import Gep from 'gep'
@@ -68,7 +72,9 @@ console.log(res)
 // 18.85m
 ```
 
-with function and constant
+#### With function and constant
+
+try: [CodePen](http://codepen.io/lon/pen/rWLLKx?editors=0010#0) [JSFiddle](https://jsfiddle.net/lon/zLso6co4/)
 
 ``` javascript
 import Gep from 'gep'
