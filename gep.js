@@ -257,6 +257,7 @@
 
     this._funcParams = params.join(',').replace(wsRE, '')
     this._funcBefore = 'function(' + this._funcParams + '){return '
+    this._funcAfter = '}'
 
     this.scope = scope
 
@@ -345,51 +346,78 @@
   }
 
   /**
-   * Build a getter function. Requires eval.
+   * Parse source to expression.
    *
-   * We isolate the try/catch so it doesn't affect the
-   * optimization of the parse function when it is not called.
-   *
-   * @param {String} body
-   * @param {String} toStr
-   * @return {Function|String|undefined}
+   * @param {String} source
+   * @return {String}
    */
 
-  gp.make = function (body, toStr) {
-    if (toStr) {
-      return this._funcBefore + body + '}'
+  gp.parse = function (source) {
+    if (!(source && (source = source.trim()))) {
+      return ''
     }
+    // try cache
+    var hit = this._cache.get(source)
+    if (hit) {
+      return hit
+    }
+    var result = isSimplePath(source) && source.indexOf('[') < 0
+      ? this._addScope(source)
+      : this.compile(source)
+    this._cache.put(source, result)
+    return result
+  }
+
+  /**
+   * Build expression to function. Requires eval.
+   *
+   * @param {String} expression
+   * @return {Function|undefined}
+   */
+
+  gp.build = function (expression) {
     try {
       /* eslint-disable no-new-func */
-      return new Function(this._funcParams, 'return ' + body)
+      return new Function(this._funcParams, 'return ' + expression)
       /* eslint-enable no-new-func */
     } catch (e) {
-      Gep.debug && warn('Invalid expression. Generated function body: ' + body)
+      Gep.debug && warn('Invalid expression. Generated function body: ' + expression)
     }
   }
 
   /**
-   * Parse an expression.
+   * Build expression to function string.
    *
-   * @param {String} expr
-   * @return {Function}
+   * @param {String} expression
+   * @return {String}
    */
 
-  gp.parse = function (expr) {
-    if (!(expr && (expr = expr.trim()))) {
-      return ''
-    }
-    // try cache
-    var hit = this._cache.get(expr)
-    if (hit) {
-      return hit
-    }
-    var res = isSimplePath(expr) && expr.indexOf('[') < 0
-      ? this._addScope(expr)
-      // dynamic getter
-      : this.compile(expr)
-    this._cache.put(expr, res)
-    return res
+  gp.buildToString = function (expression) {
+    return this._funcBefore + expression + this._funcAfter
+  }
+
+  /**
+   * Parse source to expression and build it to function.
+   *
+   * @param {String} source
+   * @return {Function|undefined}
+   */
+
+  gp.make = function (source) {
+    var expression = this.parse(source)
+    return this.build(expression)
+  }
+
+  /**
+   * Parse source to expression and build it to function string.
+   *
+   * @param {String} source
+   * @return {Function|undefined}
+   */
+
+  gp.makeToString = function (source) {
+    var expression = this.parse(source)
+    return this.buildToString(expression)
   }
 
   Gep.debug = typeof PRODUCTION === 'undefined'
