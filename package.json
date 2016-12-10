@@ -1,18 +1,18 @@
 {
-  "name": "gep",
+  "name": "jep",
   "version": "3.0.0",
-  "description": "Gep (General Expression Parser) is tiny library used to evaluate expression to javascript function",
-  "main": "gep.js",
+  "description": "Jep (Javascript Expression Parser) is tiny library used to evaluate expression to javascript function",
+  "main": "jep.js",
   "scripts": {
     "pretest": "npm run uglify",
     "test": "npm run test:normal && npm run test:uglified",
-    "test:normal": "$(npm bin)/cross-env FILE=./gep.js $(npm bin)/mocha gep.test.js",
-    "test:uglified": "$(npm bin)/cross-env FILE=./gep.min.js $(npm bin)/mocha gep.test.js",
-    "uglify": "$(npm bin)/uglifyjs gep.js -d PRODUCTION=true -c -m -r 'Gep' --mangle-props --mangle-regex '/^_/' --comments '/gep/' -o gep.min.js --source-map gep.min.js.map"
+    "test:normal": "$(npm bin)/cross-env FILE=./jep.js $(npm bin)/mocha jep.test.js",
+    "test:uglified": "$(npm bin)/cross-env FILE=./jep.min.js $(npm bin)/mocha jep.test.js",
+    "uglify": "$(npm bin)/uglifyjs jep.js -d PRODUCTION=true -c -m -r 'Jep' --mangle-props --mangle-regex '/^_/' --comments '/jep/' -o jep.min.js --source-map jep.min.js.map"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cnlon/gep.git"
+    "url": "git+https://github.com/cnlon/jep.git"
   },
   "keywords": [
     "eval",
@@ -24,9 +24,9 @@
   "author": "lon <longhaohe@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/cnlon/gep/issues"
+    "url": "https://github.com/cnlon/jep/issues"
   },
-  "homepage": "https://github.com/cnlon/gep#readme",
+  "homepage": "https://github.com/cnlon/jep#readme",
   "devDependencies": {
     "chai": "^3.5.0",
     "cross-env": "^3.1.3",

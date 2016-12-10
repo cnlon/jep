@@ -1,5 +1,5 @@
 /**
- * https://github.com/cnlon/gep
+ * https://github.com/cnlon/jep
  */
 
 (function (global, factory) {
@@ -7,7 +7,7 @@
     ? (module.exports = factory())
     : typeof define === 'function' && define.amd
       ? define(factory)
-      : (global['Gep'] = factory())
+      : (global['Jep'] = factory())
 }(this, function () {
   'use strict';
 
@@ -140,7 +140,7 @@
       + ('break,case,class,catch,const,continue,debugger,default,delete,do,else,export,extends,finally,for,function,if,import,in,instanceof,let,return,super,switch,throw,try,var,while,with,yield,enum,await,implements,package,protected,static,interface,private,public').replace(/,/g, '\\b|')
       + '\\b)'
     )
-  /* eslint-disable no-useless-escape */
+
   var wsRE = /\s/g
   var newlineRE = /\n/g
   var saveRE = /[\{,]\s*[\w\$_]+\s*:|('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*\$\{|\}(?:[^`\\]|\\.)*`|`(?:[^`\\]|\\.)*`)|new |typeof |void /g
@@ -148,7 +148,6 @@
   var pathTestRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\]|\[[A-Za-z_$][\w$]*\])*$/
   var identRE = /[^\w$\.](?:[A-Za-z_$][\w$]*)/g
   var booleanLiteralRE = /^(?:true|false)$/
-  /* eslint-enable no-useless-escape */
 
   /**
    * Save / Rewrite / Restore
@@ -200,23 +199,19 @@
   /**
    * Check if an expression is a simple path.
    *
-   * @param {String} expr
+   * @param {String} expression
    * @return {Boolean}
    */
 
-  function isSimplePath (expr) {
-    return pathTestRE.test(expr)
+  function isSimplePath (expression) {
+    return pathTestRE.test(expression)
       // don't treat true/false as paths
-      && !booleanLiteralRE.test(expr)// &&
-      // Math constants e.g. Math.PI, Math.E etc.
-      // && expr.slice(0, 5) !== 'Math.'
+      && !booleanLiteralRE.test(expression)
   }
 
   /**
-   * Check if an expression is a simple path.
-   *
-   * @param {String} expr
-   * @return {Boolean}
+   * @param {String} keywords
+   * @return {RegExp}
    */
 
   function parseKeywordsToRE (keywords) {
@@ -231,7 +226,7 @@
   }
 
   /**
-   * @param {Object} config
+   * @param {Object} options
    *   - {Number} cache, default 1000
    *              limited for Cache
    *   - {Array} params, default ['$']
@@ -239,7 +234,7 @@
    * @constructor
    */
 
-  function Gep (options) {
+  function Jep (options) {
     options = options || {}
     var cache = options.cache || 1000
     var scope = options.scope || '$'
@@ -288,40 +283,40 @@
     this._allowedKeywordsRE = parseKeywordsToRE(allowedKeywords)
   }
 
-  var gp = Gep.prototype
+  var gp = Jep.prototype
 
-  gp._addScope = function (expr) {
-    if (this._paramsPrefixRE && this._paramsPrefixRE.test(expr)) {
-      return expr
+  gp._addScope = function (expression) {
+    if (this._paramsPrefixRE && this._paramsPrefixRE.test(expression)) {
+      return expression
     }
     if (this._scopeREs) {
       var keys = Object.keys(this._scopeREs)
       for (var i = 0, l = keys.length, re; i < l; i++) {
         re = this._scopeREs[keys[i]]
-        if (re.test(expr)) {
-          return keys[i] + '.' + expr
+        if (re.test(expression)) {
+          return keys[i] + '.' + expression
         }
       }
     }
-    return this.scope + '.' + expr
+    return this.scope + '.' + expression
   }
 
   /**
    * Rewrite an expression, prefixing all path accessors with
    * `scope.` and return the new expression.
    *
-   * @param {String} expr
+   * @param {String} expression
    * @return {String}
    */
 
-  gp.compile = function (expr) {
-    if (improperKeywordsRE.test(expr)) {
-      Gep.debug && warn('Avoid using reserved keywords in expression: ' + expr)
+  gp.compile = function (expression) {
+    if (improperKeywordsRE.test(expression)) {
+      Jep.debug && warn('Avoid using reserved keywords in expression: ' + expression)
     }
     // reset state
     saved.length = 0
     // save strings and object literal keys
-    var body = expr
+    var body = expression
       .replace(saveRE, save)
       .replace(wsRE, '')
     // rewrite all paths
@@ -381,7 +376,7 @@
       return new Function(this._funcParams, 'return ' + expression)
       /* eslint-enable no-new-func */
     } catch (e) {
-      Gep.debug && warn('Invalid expression. Generated function body: ' + expression)
+      Jep.debug && warn('Invalid expression. Generated function body: ' + expression)
     }
   }
 
@@ -420,13 +415,13 @@
     return this.buildToString(expression)
   }
 
-  Gep.debug = typeof PRODUCTION === 'undefined'
+  Jep.debug = typeof PRODUCTION === 'undefined'
 
   var warn = typeof console !== 'undefined'
     && typeof console.warn === 'function'
     ? console.warn
     : function () {}
 
-  return Gep
+  return Jep
 
 }));
