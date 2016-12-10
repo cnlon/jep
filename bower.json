@@ -1,7 +1,7 @@
 {
-  "name": "gep",
-  "description": "Gep (General Expression Parser) is tiny library used to evaluate expression to javascript function",
-  "main": "gep.js",
+  "name": "jep",
+  "description": "Jep (Javascript Expression Parser) is tiny library used to evaluate expression to javascript function",
+  "main": "jep.js",
   "authors": [
     "lon <longhaohe@gmail.com>"
   ],
@@ -13,7 +13,7 @@
     "parse",
     "parser"
   ],
-  "homepage": "https://github.com/cnlon/gep",
+  "homepage": "https://github.com/cnlon/jep",
   "ignore": [
     "**/.*",
     "node_modules",
