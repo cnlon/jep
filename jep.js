@@ -283,9 +283,9 @@
     this._allowedKeywordsRE = parseKeywordsToRE(allowedKeywords)
   }
 
-  var gp = Jep.prototype
+  var jp = Jep.prototype
 
-  gp._addScope = function (expression) {
+  jp._addScope = function (expression) {
     if (this._paramsPrefixRE && this._paramsPrefixRE.test(expression)) {
       return expression
     }
@@ -309,7 +309,7 @@
    * @return {String}
    */
 
-  gp.compile = function (expression) {
+  jp.compile = function (expression) {
     if (improperKeywordsRE.test(expression)) {
       Jep.debug && warn('Avoid using reserved keywords in expression: ' + expression)
     }
@@ -347,7 +347,7 @@
    * @return {String}
    */
 
-  gp.parse = function (source) {
+  jp.parse = function (source) {
     if (!(source && (source = source.trim()))) {
       return ''
     }
@@ -370,7 +370,7 @@
    * @return {Function|undefined}
    */
 
-  gp.build = function (expression) {
+  jp.build = function (expression) {
     try {
       /* eslint-disable no-new-func */
       return new Function(this._funcParams, 'return ' + expression)
@@ -387,7 +387,7 @@
    * @return {String}
    */
 
-  gp.buildToString = function (expression) {
+  jp.buildToString = function (expression) {
     return this._funcBefore + expression + this._funcAfter
   }
 
@@ -398,7 +398,7 @@
    * @return {Function|undefined}
    */
 
-  gp.make = function (source) {
+  jp.make = function (source) {
     var expression = this.parse(source)
     return this.build(expression)
   }
@@ -410,7 +410,7 @@
    * @return {Function|undefined}
    */
 
-  gp.makeToString = function (source) {
+  jp.makeToString = function (source) {
     var expression = this.parse(source)
     return this.buildToString(expression)
   }
