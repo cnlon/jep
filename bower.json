@@ -2,10 +2,6 @@
   "name": "jep",
   "description": "Jep (Javascript Expression Parser) is tiny library used to evaluate expression to javascript function",
   "main": "jep.js",
-  "authors": [
-    "lon <longhaohe@gmail.com>"
-  ],
-  "license": "MIT",
   "keywords": [
     "eval",
     "evaluate",
@@ -13,11 +9,14 @@
     "parse",
     "parser"
   ],
+  "authors": [
+    "lon <longhaohe@gmail.com> (http://lon.im)"
+  ],
+  "license": "MIT",
   "homepage": "https://github.com/cnlon/jep",
   "ignore": [
     "**/.*",
     "node_modules",
-    "bower_components",
     "*.test.js"
   ]
 }
