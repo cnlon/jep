@@ -7,7 +7,7 @@
     ? (module.exports = factory())
     : typeof define === 'function' && define.amd
       ? define(factory)
-      : (global['Jep'] = factory())
+      : (global['JEP'] = factory())
 }(this, function () {
   'use strict';
 
@@ -234,7 +234,7 @@
    * @constructor
    */
 
-  function Jep (options) {
+  function JEP (options) {
     options = options || {}
     var cache = options.cache || 1000
     var scope = options.scope || '$'
@@ -283,9 +283,9 @@
     this._allowedKeywordsRE = parseKeywordsToRE(allowedKeywords)
   }
 
-  var jp = Jep.prototype
+  var p = JEP.prototype
 
-  jp._addScope = function (expression) {
+  p._addScope = function (expression) {
     if (this._paramsPrefixRE && this._paramsPrefixRE.test(expression)) {
       return expression
     }
@@ -309,9 +309,9 @@
    * @return {String}
    */
 
-  jp.compile = function (expression) {
+  p.compile = function (expression) {
     if (improperKeywordsRE.test(expression)) {
-      Jep.debug && warn('Avoid using reserved keywords in expression: ' + expression)
+      JEP.debug && warn('Avoid using reserved keywords in expression: ' + expression)
     }
     // reset state
     saved.length = 0
@@ -347,7 +347,7 @@
    * @return {String}
    */
 
-  jp.parse = function (source) {
+  p.parse = function (source) {
     if (!(source && (source = source.trim()))) {
       return ''
     }
@@ -370,13 +370,13 @@
    * @return {Function|undefined}
    */
 
-  jp.build = function (expression) {
+  p.build = function (expression) {
     try {
       /* eslint-disable no-new-func */
       return new Function(this._funcParams, 'return ' + expression)
       /* eslint-enable no-new-func */
     } catch (e) {
-      Jep.debug && warn('Invalid expression. Generated function body: ' + expression)
+      JEP.debug && warn('Invalid expression. Generated function body: ' + expression)
     }
   }
 
@@ -387,7 +387,7 @@
    * @return {String}
    */
 
-  jp.buildToString = function (expression) {
+  p.buildToString = function (expression) {
     return this._funcBefore + expression + this._funcAfter
   }
 
@@ -398,7 +398,7 @@
    * @return {Function|undefined}
    */
 
-  jp.make = function (source) {
+  p.make = function (source) {
     var expression = this.parse(source)
     return this.build(expression)
   }
@@ -410,18 +410,18 @@
    * @return {Function|undefined}
    */
 
-  jp.makeToString = function (source) {
+  p.makeToString = function (source) {
     var expression = this.parse(source)
     return this.buildToString(expression)
   }
 
-  Jep.debug = typeof PRODUCTION === 'undefined'
+  JEP.debug = typeof PRODUCTION === 'undefined'
 
   var warn = typeof console !== 'undefined'
     && typeof console.warn === 'function'
     ? console.warn
     : function () {}
 
-  return Jep
+  return JEP
 
 }));

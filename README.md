@@ -33,7 +33,7 @@ bower install --save jep
 try: [CodePen](http://codepen.io/lon/pen/xROVjv?editors=0010#0) [JSFiddle](https://jsfiddle.net/lon/6uz0nd8h/)
 
 ```javascript
-const jep = new Jep()
+const jep = new JEP()
 
 const fun = jep.make('a + 2 === 3')
 const result = fun({a: 1})
@@ -47,7 +47,7 @@ console.log(result)
 try: [CodePen](http://codepen.io/lon/pen/rWLLKx?editors=0010#0) [JSFiddle](https://jsfiddle.net/lon/zLso6co4/)
 
 ```javascript
-const jep = new Jep({params: ['$', 'SQUARE_METER']})
+const jep = new JEP({params: ['$', 'SQUARE_METER']})
 
 const scope = {
   radius: 3,
@@ -72,7 +72,7 @@ console.log(result)
 #### 参数
 
 ```javascript
-const jep = new Jep({
+const jep = new JEP({
   cache: 1000,
   scope: '$',
   params: ['$', 'other_param'],
@@ -84,7 +84,7 @@ const jep = new Jep({
 **scope**: `String` 类型，已解析的表达式或函数中，用于表示 `scope` 的变量名，默认 `'$'`
 
 ```javascript
-const jep = new Jep()
+const jep = new JEP()
 const parsed = jep.parse('a + b')
 console.log(parsed)
 // $.a+$.b
@@ -94,7 +94,7 @@ console.log(parsed)
 第一个必须为 `scope` 对应的变量名。其余变量名，在表达式中可以直接被访问。
 
 ```javascript
-const jep = new Jep({
+const jep = new JEP({
   params: ['$', 'other'],
 })
 const scope = {a: 1}
@@ -109,7 +109,7 @@ console.log(result)
 **parse**: 参数为 `String` 类型的待编译的表达式，返回编译好的 `String` 类型表达式
 
 ```javascript
-const jep = new Jep()
+const jep = new JEP()
 const source = 'a + b'
 const expression = jep.parse(source)
 console.log(expression)
@@ -119,7 +119,7 @@ console.log(expression)
 **build**: 参数为 `String` 类型的已编译表达式，返回编译好的 `Function` （成功） 或 `undefined` (失败)
 
 ```javascript
-const jep = new Jep()
+const jep = new JEP()
 const source = 'a + b'
 const expression = jep.parse(source) // $.a+$.b
 const fun = jep.build(expression) // 返回函数，类似 function($){return $.a+$.b}
@@ -131,7 +131,7 @@ console.log(result)
 **buildToString**: 和 build 类似，参数为 `String` 类型的已编译表达式，返回的是函数字符串
 
 ```javascript
-const jep = new Jep()
+const jep = new JEP()
 const expression = jep.parse('a + b') // $.a+$.b
 const funString = jep.buildToString(expression)
 console.log(funString)
@@ -141,7 +141,7 @@ console.log(funString)
 **make**: 和 build 类似，参数为 `String` 类型的待编译表达式，返回编译好的 `Function` （成功） 或 `undefined` (失败)
 
 ```javascript
-const jep = new Jep()
+const jep = new JEP()
 const source = 'a + b'
 const fun = jep.make(source) // 返回函数，类似 function($){return $.a+$.b}
 const result = fun({a: 1, b: 2})
@@ -152,7 +152,7 @@ console.log(result)
 **makeToString**: 和 make 类似，参数为 `String` 类型的待编译表达式，返回的是函数字符串
 
 ```javascript
-const jep = new Jep()
+const jep = new JEP()
 const funString = jep.makeToString('a + b')
 console.log(funString)
 // function($){return $.a+$.b}

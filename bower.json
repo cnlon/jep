@@ -1,6 +1,6 @@
 {
   "name": "jep",
-  "description": "Jep (Javascript Expression Parser) is tiny library used to evaluate expression to javascript function",
+  "description": "JEP (Javascript Expression Parser) is tiny library used to evaluate expression to javascript function",
   "main": "jep.js",
   "keywords": [
     "eval",

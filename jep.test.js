@@ -1,10 +1,10 @@
 const assert = require('chai').assert
-const Jep = require(process.env.FILE || './jep.js')
-const jep = new Jep({params: ['$', 'SQUARE_METER']})
+const JEP = require(process.env.FILE || './jep.js')
+const jep = new JEP({params: ['$', 'SQUARE_METER']})
 
 const equal = assert.equal
 
-describe('jep', function () {
+describe('JEP', function () {
   const scope = {
     radius: 3,
     square (n) {
