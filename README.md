@@ -81,7 +81,7 @@ const jep = new JEP({
 
 **cache**: `Number` 类型，jep 内部使用 LRU 缓存解析过的表达式，`cache` 表示最大缓存数，默认 `1000`
 
-**scope**: `String` 类型，已解析的表达式或函数中，用于表示 `scope` 的变量名，默认 `'$'`
+**scope**: `String` 类型，在已解析的表达式或函数中，用于表示 `scope` 的变量名，默认 `'$'`
 
 ```javascript
 const jep = new JEP()
