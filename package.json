@@ -6,9 +6,9 @@
   "scripts": {
     "pretest": "npm run uglify",
     "test": "npm run test:normal && npm run test:uglified",
-    "test:normal": "$(npm bin)/cross-env FILE=./jep.js $(npm bin)/mocha jep.test.js",
-    "test:uglified": "$(npm bin)/cross-env FILE=./jep.min.js $(npm bin)/mocha jep.test.js",
-    "uglify": "$(npm bin)/uglifyjs jep.js -d PRODUCTION=true -c -m -r 'JEP' --mangle-props --mangle-regex '/^_/' --comments '/jep/' -o jep.min.js --source-map jep.min.js.map"
+    "test:normal": "cross-env FILE=./jep.js $(npm bin)/mocha jep.test.js",
+    "test:uglified": "cross-env FILE=./jep.min.js $(npm bin)/mocha jep.test.js",
+    "uglify": "uglifyjs jep.js -d PRODUCTION=true -c -m -r 'JEP' --mangle-props --mangle-regex '/^_/' --comments '/jep/' -o jep.min.js --source-map jep.min.js.map"
   },
   "keywords": [
     "eval",
