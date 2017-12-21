@@ -1,7 +1,7 @@
 # Javascript Expression Parser
 
+[![npm version](https://img.shields.io/npm/v/jep.svg)](https://www.npmjs.com/package/jep)
 [![Build Status](https://travis-ci.org/cnlon/jep.svg?branch=master)](https://travis-ci.org/cnlon/jep)
-[![npm version](https://badge.fury.io/js/jep.svg)](https://badge.fury.io/js/jep)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com)
 
 ## 简介
@@ -11,13 +11,13 @@ JEP (Javascript Expression Parser) 是一个十分小巧的库，用于将 JavaS
 ### 优势：
 
 1. 底层转换使用 `Function`，比 `eval` 快。
-2. 内置最近最少使用算法（LRU），缓存解析结果，减少解析次数。
+2. 使用最近最少使用算法（LRU），缓存解析结果，减少解析次数。
 3. 支持解析至函数字符串，方便预编译。
 
 ## 安装
 
 ```bash
-npm install --save jep
+npm install jep
 ```
 
 ## 使用
