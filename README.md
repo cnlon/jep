@@ -20,12 +20,6 @@ JEP (Javascript Expression Parser) 是一个十分小巧的库，用于将 JavaS
 npm install --save jep
 ```
 
-或
-
-```bash
-bower install --save jep
-```
-
 ## 使用
 
 #### 快速上手
