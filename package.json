@@ -1,7 +1,7 @@
 {
   "name": "jep",
   "version": "3.1.1",
-  "description": "JEP (Javascript Expression Parser) is tiny library used to evaluate expression to javascript function",
+  "description": "\"Javascript Expression Parser\" (JEP) is tiny library used to evaluate expression to javascript function",
   "main": "jep.js",
   "scripts": {
     "test": "mocha jep.test.js"
@@ -13,6 +13,9 @@
     "expression",
     "parse"
   ],
+  "dependencies": {
+    "zen-lru": "^0.1.0"
+  },
   "devDependencies": {
     "mocha": "^4.0.1"
   },
