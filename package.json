@@ -4,11 +4,7 @@
   "description": "JEP (Javascript Expression Parser) is tiny library used to evaluate expression to javascript function",
   "main": "jep.js",
   "scripts": {
-    "pretest": "npm run uglify",
-    "test": "npm run test:normal && npm run test:uglified",
-    "test:normal": "cross-env FILE=./jep.js $(npm bin)/mocha jep.test.js",
-    "test:uglified": "cross-env FILE=./jep.min.js $(npm bin)/mocha jep.test.js",
-    "uglify": "uglifyjs jep.js -d PRODUCTION=true -c -m -r 'JEP' --mangle-props --mangle-regex '/^_/' --comments '/jep/' -o jep.min.js --source-map jep.min.js.map"
+    "test": "mocha jep.test.js"
   },
   "keywords": [
     "eval",
@@ -17,8 +13,10 @@
     "expression",
     "parse"
   ],
-  "author": "lon (http://lon.im)",
-  "license": "MIT",
+  "devDependencies": {
+    "mocha": "^4.0.1"
+  },
+  "homepage": "https://github.com/cnlon/jep#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cnlon/jep.git"
@@ -26,18 +24,11 @@
   "bugs": {
     "url": "https://github.com/cnlon/jep/issues"
   },
-  "homepage": "https://github.com/cnlon/jep#readme",
-  "devDependencies": {
-    "chai": "^3.5.0",
-    "cross-env": "^3.1.3",
-    "mocha": "^3.1.2",
-    "uglify-js": "^2.7.4"
-  },
+  "author": "lon (http://lon.im)",
+  "license": "MIT",
   "files": [
     "package.json",
     "jep.js",
-    "jep.min.js",
-    "jep.min.js.map",
     "README.md",
     "LICENSE"
   ]
