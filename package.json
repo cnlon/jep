@@ -17,7 +17,7 @@
     "zen-lru": "^0.1.0"
   },
   "devDependencies": {
-    "mocha": "^4.0.1"
+    "mocha": "^5.2.0"
   },
   "homepage": "https://github.com/cnlon/jep#readme",
   "repository": {
